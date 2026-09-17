@@ -1,0 +1,25 @@
+/* Dashboard Specific Styles */
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.metric-label {
+  font-size: 0.8rem;
+  color: var(--secondary);
+  font-weight: 500;
+}
+
+.table-action-btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+  border-radius: 6px;
+}
+
+.text-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

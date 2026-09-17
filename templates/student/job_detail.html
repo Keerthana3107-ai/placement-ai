@@ -1,0 +1,286 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ job.title }} - {{ job.company.name }}{% endblock %}
+{% block page_heading %}Job Details & AI Compatibility Analysis{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <div class="mb-3">
+        <a href="{{ url_for('student.jobs') }}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back to All Drives
+        </a>
+    </div>
+
+    <!-- Job Header Card -->
+    <div class="card-modern p-4 mb-4">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-8">
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <img src="{{ job.company.logo_url or 'https://ui-avatars.com/api/?name=' + job.company.name }}" alt="{{ job.company.name }}" class="company-logo-img" style="width: 60px; height: 60px;">
+                    <div>
+                        <h3 class="fw-bold text-dark mb-0">{{ job.title }}</h3>
+                        <div class="text-muted">
+                            <i class="bi bi-building"></i> {{ job.company.name }} • <i class="bi bi-geo-alt"></i> {{ job.location }} • <i class="bi bi-briefcase"></i> {{ job.company.industry }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 mt-3">
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 fs-6">
+                        <i class="bi bi-cash-stack me-1"></i> CTC: {{ job.salary_package }}
+                    </span>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 fs-6">
+                        <i class="bi bi-mortarboard me-1"></i> Minimum CGPA: {{ job.min_cgpa }}
+                    </span>
+                    <span class="badge bg-light text-dark border px-3 py-2 fs-6">
+                        <i class="bi bi-calendar-x me-1"></i> Deadline: {{ job.deadline }}
+                    </span>
+                    <span class="badge bg-light text-dark border px-3 py-2 fs-6">
+                        <i class="bi bi-people me-1"></i> {{ job.openings }} Openings
+                    </span>
+                </div>
+            </div>
+
+            <!-- AI Match Score Banner -->
+            <div class="col-lg-4 text-lg-end">
+                <div class="d-inline-block p-3 rounded-4 bg-light border text-center shadow-sm" style="min-width: 220px;">
+                    <span class="text-muted small fw-semibold text-uppercase d-block mb-1">AI Recommendation Score</span>
+                    <div class="d-inline-flex align-items-center justify-content-center p-3 rounded-circle mb-1 {% if match_data.match_score >= 80 %}bg-success-subtle text-success{% elif match_data.match_score >= 60 %}bg-warning-subtle text-warning{% else %}bg-secondary-subtle text-secondary{% endif %}" style="width: 70px; height: 70px;">
+                        <span class="fs-3 fw-bold">{{ match_data.match_score }}%</span>
+                    </div>
+                    <div class="small fw-bold text-dark">
+                        {% if match_data.match_score >= 80 %}
+                            <i class="bi bi-star-fill text-warning me-1"></i> High Compatibility
+                        {% elif match_data.match_score >= 60 %}
+                            <i class="bi bi-check2-circle text-primary me-1"></i> Moderate Fit
+                        {% else %}
+                            <i class="bi bi-info-circle text-muted me-1"></i> Low Fit
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <!-- Left Column: Job Description & Requirements -->
+        <div class="col-lg-7">
+            <!-- Job Description -->
+            <div class="card-modern p-4 mb-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-file-text text-primary me-2"></i>Job Description</h5>
+                <p class="text-muted" style="line-height: 1.7;">{{ job.description }}</p>
+
+                <h6 class="fw-bold mt-4 mb-2">Required Skills:</h6>
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    {% for skill in job.get_required_skills_list() %}
+                        <span class="badge bg-light text-dark border px-3 py-2">
+                            {{ skill }}
+                        </span>
+                    {% endfor %}
+                </div>
+
+                <h6 class="fw-bold mt-4 mb-2">Eligible Engineering Disciplines:</h6>
+                <div class="d-flex flex-wrap gap-2">
+                    {% for dept in job.get_eligible_departments_list() %}
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1">
+                            <i class="bi bi-diagram-3 me-1"></i>{{ dept }}
+                        </span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- About Company -->
+            <div class="card-modern p-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-building text-primary me-2"></i>About {{ job.company.name }}</h5>
+                <p class="text-muted small mb-3">{{ job.company.description or 'Leading multinational enterprise participating in campus placement recruitment drives.' }}</p>
+                {% if job.company.website %}
+                <a href="{{ job.company.website }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-globe me-1"></i> Visit Company Website
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Right Column: AI Match Breakdown & Eligibility Verifier -->
+        <div class="col-lg-5">
+            <!-- SECTION 9: ELIGIBILITY CHECKER -->
+            <div class="card-modern p-4 mb-4 border-2 {% if match_data.is_eligible %}border-success{% else %}border-danger{% endif %}">
+                <h5 class="fw-bold mb-3 d-flex align-items-center justify-content-between">
+                    <span><i class="bi bi-shield-check text-primary me-2"></i>Eligibility Status</span>
+                    {% if match_data.is_eligible %}
+                        <span class="badge bg-success"><i class="bi bi-check-circle-fill me-1"></i> Eligible</span>
+                    {% else %}
+                        <span class="badge bg-danger"><i class="bi bi-x-circle-fill me-1"></i> Ineligible</span>
+                    {% endif %}
+                </h5>
+
+                {% if match_data.is_eligible %}
+                    <div class="alert alert-success d-flex align-items-center mb-3">
+                        <i class="bi bi-check-circle-fill fs-4 me-2"></i>
+                        <div>
+                            <strong>You are eligible to apply.</strong>
+                            <p class="small mb-0">Your profile satisfies all academic requirements set by {{ job.company.name }}.</p>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="alert alert-danger d-flex align-items-center mb-3">
+                        <i class="bi bi-exclamation-octagon-fill fs-4 me-2"></i>
+                        <div>
+                            <strong>You are not eligible to apply.</strong>
+                            <p class="small mb-0">Review the criteria below that did not satisfy the minimum requirements.</p>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Detailed itemized checklist -->
+                <div class="list-group list-group-flush mb-3">
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
+                        <div>
+                            <span class="small fw-semibold d-block">CGPA Cutoff ({{ job.min_cgpa }})</span>
+                            <span class="text-muted" style="font-size:0.75rem;">Your CGPA: {{ "%.2f"|format(student.cgpa) }}</span>
+                        </div>
+                        {% if student.cgpa >= job.min_cgpa %}
+                            <span class="badge bg-success-subtle text-success"><i class="bi bi-check-lg"></i> Satisfied</span>
+                        {% else %}
+                            <span class="badge bg-danger-subtle text-danger"><i class="bi bi-x-lg"></i> Short by {{ "%.2f"|format(job.min_cgpa - student.cgpa) }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
+                        <div>
+                            <span class="small fw-semibold d-block">Eligible Department</span>
+                            <span class="text-muted" style="font-size:0.75rem;">Your Branch: {{ student.department }}</span>
+                        </div>
+                        {% if match_data.factors.department > 50 %}
+                            <span class="badge bg-success-subtle text-success"><i class="bi bi-check-lg"></i> Eligible</span>
+                        {% else %}
+                            <span class="badge bg-danger-subtle text-danger"><i class="bi bi-x-lg"></i> Not Listed</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
+                        <div>
+                            <span class="small fw-semibold d-block">Graduation Batch</span>
+                            <span class="text-muted" style="font-size:0.75rem;">Batch of {{ student.graduation_year }}</span>
+                        </div>
+                        <span class="badge bg-success-subtle text-success"><i class="bi bi-check-lg"></i> {{ job.graduation_year }} Batch</span>
+                    </div>
+                </div>
+
+                <!-- Action Button: Apply or Disabled -->
+                {% if application %}
+                    <div class="p-3 bg-light rounded-3 text-center border">
+                        <span class="badge bg-info text-dark px-3 py-2 fs-6 mb-2">Status: {{ application.status }}</span>
+                        <p class="small text-muted mb-0">You submitted your application on {{ application.applied_at.strftime('%b %d, %Y') }}.</p>
+                        <a href="{{ url_for('student.applications') }}" class="btn btn-sm btn-outline-primary mt-2">
+                            View in Application Tracker &rarr;
+                        </a>
+                    </div>
+                {% elif match_data.is_eligible %}
+                    <form method="POST" action="{{ url_for('student.apply_job', job_id=job.id) }}">
+                        <button type="submit" class="btn btn-primary w-100 py-3 fw-bold fs-6 shadow-sm">
+                            <i class="bi bi-send-fill me-2"></i> Submit Job Application
+                        </button>
+                    </form>
+                {% else %}
+                    <button class="btn btn-secondary w-100 py-3 fw-semibold" disabled>
+                        <i class="bi bi-lock-fill me-1"></i> Application Locked (Not Eligible)
+                    </button>
+                    <span class="text-muted d-block text-center mt-2" style="font-size: 0.75rem;">
+                        College placement policy restricts applications from candidates not meeting company cutoffs.
+                    </span>
+                {% endif %}
+            </div>
+
+            <!-- SECTION 10: AI RECOMMENDATION BREAKDOWN -->
+            <div class="card-modern p-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-stars text-warning me-2"></i>Why This Job Matches You</h5>
+                
+                <!-- Reasons List -->
+                <div class="mb-3">
+                    <ul class="list-group list-group-flush">
+                        {% for reason in match_data.reasons %}
+                            <li class="list-group-item px-0 py-2 d-flex align-items-start small text-dark">
+                                <i class="bi bi-check-circle-fill text-success fs-6 me-2 flex-shrink-0"></i>
+                                <span>{{ reason }}</span>
+                            </li>
+                        {% endfor %}
+                        {% for mreason in match_data.missing_reasons %}
+                            <li class="list-group-item px-0 py-2 d-flex align-items-start small text-muted">
+                                <i class="bi bi-exclamation-triangle text-warning fs-6 me-2 flex-shrink-0"></i>
+                                <span>{{ mreason }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- Factor Bars -->
+                <h6 class="fw-bold small text-muted text-uppercase mb-2">Algorithm Factor Weights:</h6>
+                
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span class="text-muted">Technical Skills Overlap (40%)</span>
+                        <span class="fw-bold">{{ match_data.factors.skills }}%</span>
+                    </div>
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar bg-primary" style="width: {{ match_data.factors.skills }}%"></div>
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span class="text-muted">Academic CGPA Index (25%)</span>
+                        <span class="fw-bold">{{ match_data.factors.cgpa }}%</span>
+                    </div>
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar bg-success" style="width: {{ match_data.factors.cgpa }}%"></div>
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span class="text-muted">Department Match (20%)</span>
+                        <span class="fw-bold">{{ match_data.factors.department }}%</span>
+                    </div>
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar bg-info" style="width: {{ match_data.factors.department }}%"></div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span class="text-muted">Project & Cert Relevance (15%)</span>
+                        <span class="fw-bold">{{ match_data.factors.projects }}%</span>
+                    </div>
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar bg-warning" style="width: {{ match_data.factors.projects }}%"></div>
+                    </div>
+                </div>
+
+                <!-- Matched vs Unmatched Skills -->
+                {% if match_data.matched_skills %}
+                <div class="pt-3 border-top">
+                    <div class="small fw-semibold text-success mb-1">Matched Skills:</div>
+                    <div class="d-flex flex-wrap gap-1 mb-2">
+                        {% for ms in match_data.matched_skills %}
+                            <span class="badge bg-success-subtle text-success border border-success-subtle small">{{ ms }} ✓</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if match_data.unmatched_skills %}
+                <div>
+                    <div class="small fw-semibold text-muted mb-1">Skills to learn:</div>
+                    <div class="d-flex flex-wrap gap-1">
+                        {% for ums in match_data.unmatched_skills %}
+                            <span class="badge bg-light text-muted border small">{{ ums }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

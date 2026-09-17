@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Job Recommendations - Placement Portal{% endblock %}
+{% block page_heading %}AI-Powered Placement Recommendations{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <div class="card-modern p-4 mb-4 border-0 shadow-sm" style="background: linear-gradient(135deg, #312e81 0%, #4338ca 100%); color: #ffffff;">
+        <div class="row align-items-center g-3">
+            <div class="col-md-8">
+                <span class="badge bg-warning text-dark px-3 py-1 mb-2 fw-bold">
+                    <i class="bi bi-cpu-fill me-1"></i> Scikit-Learn TF-IDF Matching Engine
+                </span>
+                <h3 class="fw-bold mb-1">Personalized Placement Matches</h3>
+                <p class="text-light opacity-90 mb-0 small">
+                    Our explainable algorithm evaluates your technical skills, CGPA, graduation batch, projects, and certifications against live company requirements.
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{{ url_for('student.profile') }}" class="btn btn-light fw-bold">
+                    <i class="bi bi-pencil-square me-1"></i> Update Skills Profile
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% if recommendations %}
+        <div class="row g-3">
+            {% for rec in recommendations %}
+            {% set job = rec.job %}
+            <div class="col-lg-6">
+                <div class="job-card">
+                    <div>
+                        <!-- Header -->
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <img src="{{ job.company.logo_url or 'https://ui-avatars.com/api/?name=' + job.company.name }}" alt="{{ job.company.name }}" class="company-logo-img">
+                                <div>
+                                    <h5 class="fw-bold mb-0 text-dark">{{ job.title }}</h5>
+                                    <span class="text-muted small"><i class="bi bi-building"></i> {{ job.company.name }} • <i class="bi bi-geo-alt"></i> {{ job.location }}</span>
+                                </div>
+                            </div>
+
+                            <span class="ai-match-badge {% if rec.match_score >= 80 %}ai-match-high{% elif rec.match_score >= 60 %}ai-match-med{% else %}ai-match-low{% endif %}">
+                                <i class="bi bi-stars"></i> {{ rec.match_score }}% Match
+                            </span>
+                        </div>
+
+                        <!-- Package & Cutoff -->
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                <i class="bi bi-cash-stack me-1"></i>{{ job.salary_package }}
+                            </span>
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                                <i class="bi bi-mortarboard me-1"></i>Min CGPA: {{ job.min_cgpa }}
+                            </span>
+                            <span class="badge bg-light text-dark border">
+                                <i class="bi bi-calendar-check me-1"></i>Deadline: {{ job.deadline }}
+                            </span>
+                        </div>
+
+                        <!-- Transparent Explainability Points -->
+                        <div class="p-3 bg-light rounded-3 border mb-3">
+                            <strong class="small text-dark d-block mb-2"><i class="bi bi-lightbulb-fill text-warning me-1"></i>Why Recommended for You:</strong>
+                            <ul class="list-unstyled mb-0 small">
+                                {% for reason in rec.reasons %}
+                                    <li class="d-flex align-items-start mb-1 text-dark">
+                                        <i class="bi bi-check2-circle text-success fs-6 me-2 flex-shrink-0"></i>
+                                        <span>{{ reason }}</span>
+                                    </li>
+                                {% endfor %}
+                                {% for mreason in rec.missing_reasons %}
+                                    <li class="d-flex align-items-start text-muted">
+                                        <i class="bi bi-dash-circle text-secondary fs-6 me-2 flex-shrink-0"></i>
+                                        <span>{{ mreason }}</span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+
+                        <!-- Algorithm Factor Bars -->
+                        <div class="row g-2 mb-3 small text-muted">
+                            <div class="col-6">
+                                <span style="font-size:0.75rem;">Skills Match: <strong>{{ rec.factors.skills }}%</strong></span>
+                                <div class="progress" style="height:4px;"><div class="progress-bar bg-primary" style="width: {{ rec.factors.skills }}%"></div></div>
+                            </div>
+                            <div class="col-6">
+                                <span style="font-size:0.75rem;">CGPA Fit: <strong>{{ rec.factors.cgpa }}%</strong></span>
+                                <div class="progress" style="height:4px;"><div class="progress-bar bg-success" style="width: {{ rec.factors.cgpa }}%"></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-top d-flex justify-content-between align-items-center">
+                        {% if rec.is_eligible %}
+                            <span class="small text-success fw-semibold"><i class="bi bi-check-circle-fill me-1"></i> Eligible to Apply</span>
+                        {% else %}
+                            <span class="small text-danger fw-semibold"><i class="bi bi-x-circle-fill me-1"></i> Criteria Not Met</span>
+                        {% endif %}
+
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-light border btn-check-eligibility" data-job-id="{{ job.id }}">
+                                <i class="bi bi-check2-circle text-primary"></i> Check
+                            </button>
+                            <a href="{{ url_for('student.job_detail', job_id=job.id) }}" class="btn btn-sm btn-primary fw-semibold">
+                                View & Apply &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card-modern p-5 text-center text-muted">
+            <i class="bi bi-stars fs-1 text-secondary mb-3 d-block"></i>
+            <h5 class="fw-bold">No Job Recommendations Available Yet</h5>
+            <p class="small text-muted">Update your technical skills and academic details in your profile to trigger AI recommendations.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,277 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Dashboard{% endblock %}
+{% block page_heading %}Welcome, {{ student.full_name }}!{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Top Welcome & Profile Completion Banner -->
+    <div class="card-modern p-4 mb-4 border-0 shadow-sm" style="background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-8">
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <div class="navbar-user-avatar" style="width: 52px; height: 52px; font-size: 1.3rem;">
+                        {{ student.full_name[:1].upper() }}
+                    </div>
+                    <div>
+                        <h4 class="fw-bold mb-0">{{ student.full_name }}</h4>
+                        <span class="text-muted small">
+                            <i class="bi bi-mortarboard me-1"></i>{{ student.department }} • Batch of {{ student.graduation_year }} • {{ student.college }}
+                        </span>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="small fw-semibold text-muted">Profile Completion</span>
+                        <span class="small fw-bold text-primary">{{ completion_pct }}%</span>
+                    </div>
+                    <div class="progress completion-progress">
+                        <div class="progress-bar completion-bar" role="progressbar" style="width: {{ completion_pct }}%" aria-valuenow="{{ completion_pct }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    {% if suggestions %}
+                    <div class="small text-muted mt-2">
+                        <i class="bi bi-lightbulb text-warning me-1"></i><strong>Tip:</strong> {{ suggestions[0] }}
+                        <a href="{{ url_for('student.profile') }}" class="ms-2 text-decoration-none">Update Profile &rarr;</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="col-lg-4 text-lg-end">
+                <div class="d-inline-block text-start p-3 bg-white rounded-3 border shadow-sm">
+                    <span class="text-muted small text-uppercase fw-semibold d-block">Placement Status</span>
+                    {% if student.placement_status == 'Placed' %}
+                        <span class="badge bg-success fs-6 mt-1 px-3 py-2"><i class="bi bi-check-circle-fill me-1"></i> Placed at {{ student.placed_company }} ({{ student.placed_package }} LPA)</span>
+                    {% else %}
+                        <span class="badge bg-secondary fs-6 mt-1 px-3 py-2"><i class="bi bi-clock-history me-1"></i> Actively Seeking Opportunities</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stat KPI Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Current CGPA</span>
+                        <h3 class="fw-bold mt-1 mb-0">{{ "%.2f"|format(student.cgpa) }}</h3>
+                    </div>
+                    <div class="stat-icon stat-icon-primary">
+                        <i class="bi bi-award-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Applications</span>
+                        <h3 class="fw-bold mt-1 mb-0">{{ total_apps }}</h3>
+                    </div>
+                    <div class="stat-icon stat-icon-info">
+                        <i class="bi bi-send-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Shortlisted</span>
+                        <h3 class="fw-bold mt-1 mb-0">{{ shortlisted_apps }}</h3>
+                    </div>
+                    <div class="stat-icon stat-icon-warning">
+                        <i class="bi bi-bookmark-check-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Interviews</span>
+                        <h3 class="fw-bold mt-1 mb-0">{{ interviews|length }}</h3>
+                    </div>
+                    <div class="stat-icon stat-icon-success">
+                        <i class="bi bi-camera-video-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Upcoming Interview Countdown (if scheduled) -->
+    {% if next_interview %}
+    <div class="countdown-box mb-4">
+        <div class="row align-items-center g-3">
+            <div class="col-md-7">
+                <span class="badge bg-warning text-dark px-3 py-1 mb-2 fw-bold">
+                    <i class="bi bi-alarm-fill me-1"></i> Upcoming Interview Round
+                </span>
+                <h4 class="fw-bold text-white mb-1">{{ next_interview.round_name }}</h4>
+                <p class="text-light opacity-75 mb-2">
+                    Company: <strong>{{ next_interview.company.name }}</strong> • Role: {{ next_interview.job.title }}
+                </p>
+                <div class="small text-light opacity-90">
+                    <i class="bi bi-calendar-event me-1"></i> Date: <strong>{{ next_interview.interview_date }}</strong> at <strong>{{ next_interview.interview_time }}</strong>
+                    <span class="mx-2">•</span>
+                    <i class="bi bi-geo-alt me-1"></i> Mode: {{ next_interview.mode }}
+                </div>
+            </div>
+            <div class="col-md-5 text-center text-md-end">
+                <div id="interviewCountdown" data-target-datetime="{{ next_interview.interview_date }}T{{ next_interview.interview_time }}" class="mb-3">
+                    <!-- Countdown rendered by main.js -->
+                </div>
+                {% if next_interview.meeting_link %}
+                <a href="{{ next_interview.meeting_link }}" target="_blank" class="btn btn-success fw-bold px-4 shadow-sm">
+                    <i class="bi bi-box-arrow-up-right me-1"></i> Join Meeting
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Middle Row: Application Status Chart & Skills Overview -->
+    <div class="row g-4 mb-4">
+        <!-- Application Status Chart -->
+        <div class="col-lg-6">
+            <div class="card-modern h-100">
+                <div class="card-header">
+                    <span><i class="bi bi-pie-chart-fill text-primary me-2"></i>Application Status Distribution</span>
+                    <a href="{{ url_for('student.applications') }}" class="small text-decoration-none">View All</a>
+                </div>
+                <div class="card-body d-flex flex-column align-items-center justify-content-center" style="min-height: 280px;">
+                    <div style="position: relative; height: 230px; width: 100%;">
+                        <canvas id="studentAppStatusChart"
+                                data-labels='{{ ["Applied", "Under Review", "Shortlisted", "Interview Scheduled", "Selected", "Rejected"]|tojson }}'
+                                data-values='{{ [status_counts["Applied"], status_counts["Under Review"], status_counts["Shortlisted"], status_counts["Interview Scheduled"], status_counts["Selected"], status_counts["Rejected"]]|tojson }}'>
+                        </canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student Skills Overview -->
+        <div class="col-lg-6">
+            <div class="card-modern h-100">
+                <div class="card-header">
+                    <span><i class="bi bi-tools text-primary me-2"></i>My Technical Skills</span>
+                    <a href="{{ url_for('student.profile', tab='skills') }}" class="small text-decoration-none">+ Add More</a>
+                </div>
+                <div class="card-body">
+                    {% if student.skills %}
+                        <div class="d-flex flex-wrap gap-1 mb-4">
+                            {% for skill in student.skills %}
+                                <span class="skill-tag">
+                                    <i class="bi bi-check2 text-success"></i>
+                                    <strong>{{ skill.skill_name }}</strong>
+                                    <span class="text-muted" style="font-size:0.75rem;">({{ skill.proficiency }})</span>
+                                </span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4 text-muted">
+                            <i class="bi bi-code-slash fs-1 text-secondary mb-2 d-block"></i>
+                            No skills added yet. Add skills to power up your AI recommendations!
+                            <div class="mt-3">
+                                <a href="{{ url_for('student.profile', tab='skills') }}" class="btn btn-sm btn-primary">Add Skills Now</a>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <div class="p-3 bg-light rounded-3 mt-auto">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <i class="bi bi-stars text-primary fs-5"></i>
+                            <strong class="small text-dark">AI Matching Tip</strong>
+                        </div>
+                        <p class="small text-muted mb-0">
+                            Our Scikit-Learn recommendation model matches your skills and projects with company requirements to calculate your compatibility scores.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI-Recommended Placement Drives Section -->
+    <div class="mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h5 class="fw-bold mb-0"><i class="bi bi-stars text-warning me-2"></i>AI-Recommended Jobs For You</h5>
+                <span class="text-muted small">Personalized opportunities ranked by Scikit-Learn compatibility algorithm</span>
+            </div>
+            <a href="{{ url_for('student.recommendations') }}" class="btn btn-sm btn-outline-primary fw-semibold">
+                Explore All Recommendations &rarr;
+            </a>
+        </div>
+
+        {% if recommendations %}
+        <div class="row g-3">
+            {% for rec in recommendations %}
+            {% set job = rec.job %}
+            <div class="col-md-6 col-xl-3">
+                <div class="job-card">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <img src="{{ job.company.logo_url or 'https://ui-avatars.com/api/?name=' + job.company.name }}" alt="{{ job.company.name }}" class="company-logo-img">
+                            <span class="ai-match-badge {% if rec.match_score >= 80 %}ai-match-high{% elif rec.match_score >= 60 %}ai-match-med{% else %}ai-match-low{% endif %}">
+                                <i class="bi bi-stars"></i> {{ rec.match_score }}% Match
+                            </span>
+                        </div>
+
+                        <h6 class="fw-bold mb-1 text-truncate" title="{{ job.title }}">{{ job.title }}</h6>
+                        <div class="small text-muted mb-2">{{ job.company.name }} • <i class="bi bi-geo-alt"></i> {{ job.location }}</div>
+
+                        <div class="d-flex gap-2 mb-2 flex-wrap">
+                            <span class="badge bg-light text-dark border"><i class="bi bi-cash-stack text-success me-1"></i>{{ job.salary_package }}</span>
+                            <span class="badge bg-light text-dark border"><i class="bi bi-mortarboard text-primary me-1"></i>Min CGPA: {{ job.min_cgpa }}</span>
+                        </div>
+
+                        <!-- Match Explainability Bullet Points -->
+                        <div class="p-2 bg-light rounded-2 mb-3" style="font-size: 0.76rem;">
+                            <strong class="text-dark d-block mb-1"><i class="bi bi-info-circle text-primary me-1"></i>Why recommended:</strong>
+                            <ul class="list-unstyled mb-0 text-muted">
+                                {% for reason in rec.reasons[:2] %}
+                                    <li class="d-flex align-items-start mb-1">
+                                        <i class="bi bi-check text-success fs-6 me-1 flex-shrink-0"></i>
+                                        <span>{{ reason }}</span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="d-flex gap-2">
+                            <a href="{{ url_for('student.job_detail', job_id=job.id) }}" class="btn btn-sm btn-outline-primary flex-grow-1">
+                                View Details
+                            </a>
+                            <button class="btn btn-sm btn-light border btn-check-eligibility" data-job-id="{{ job.id }}" title="Quick Eligibility Check">
+                                <i class="bi bi-check2-circle text-success"></i> Check
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="card-modern p-4 text-center text-muted">
+            <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
+            No new job recommendations right now. Check back soon as new campus drives are added!
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+{% endblock %}

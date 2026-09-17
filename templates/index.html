@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+
+{% block title %}AI-Powered Campus Placement Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Hero Section -->
+    <div class="py-5 px-4 mb-5 text-white rounded-4" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);">
+        <div class="row align-items-center g-5 py-4">
+            <div class="col-lg-7">
+                <span class="badge bg-indigo-subtle text-white border border-light-subtle px-3 py-2 rounded-pill mb-3">
+                    <i class="bi bi-stars text-warning me-1"></i> Next-Gen Campus Recruitment
+                </span>
+                <h1 class="display-4 fw-bold lh-1 mb-3">
+                    AI-Powered Placement Management Platform
+                </h1>
+                <p class="lead text-light opacity-75 mb-4">
+                    Connecting talented students, university placement officers, and top global recruiters with explainable AI job recommendations, automated eligibility verification, and end-to-end recruitment tracking.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-light btn-lg px-4 fw-bold shadow-sm">
+                        <i class="bi bi-box-arrow-in-right me-2 text-primary"></i> Sign In to Portal
+                    </a>
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-outline-light btn-lg px-4 fw-semibold">
+                        <i class="bi bi-person-plus me-2"></i> Register New Account
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-lg-5">
+                <!-- Quick Demo Login Card -->
+                <div class="card bg-white text-dark shadow-lg border-0 rounded-4 p-4">
+                    <h5 class="fw-bold mb-1 text-primary"><i class="bi bi-lightning-charge-fill text-warning me-1"></i> Quick Demo Access</h5>
+                    <p class="text-muted small mb-3">Instantly test the portal with pre-configured roles and realistic data.</p>
+                    
+                    <div class="d-grid gap-2">
+                        <form action="{{ url_for('auth.login') }}" method="POST">
+                            <input type="hidden" name="identifier" value="student@example.com">
+                            <input type="hidden" name="password" value="password123">
+                            <button type="submit" class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-between py-2">
+                                <span><i class="bi bi-person-fill me-2"></i> <strong>Student:</strong> Alex Morgan (CS, 8.8 CGPA)</span>
+                                <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </form>
+
+                        <form action="{{ url_for('auth.login') }}" method="POST">
+                            <input type="hidden" name="identifier" value="admin@example.com">
+                            <input type="hidden" name="password" value="admin123">
+                            <button type="submit" class="btn btn-outline-dark w-100 d-flex align-items-center justify-content-between py-2">
+                                <span><i class="bi bi-shield-lock-fill me-2"></i> <strong>Placement Officer:</strong> Admin</span>
+                                <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </form>
+
+                        <form action="{{ url_for('auth.login') }}" method="POST">
+                            <input type="hidden" name="identifier" value="recruiter@google.com">
+                            <input type="hidden" name="password" value="password123">
+                            <button type="submit" class="btn btn-outline-success w-100 d-flex align-items-center justify-content-between py-2">
+                                <span><i class="bi bi-building-fill me-2"></i> <strong>Company:</strong> Google Recruiter</span>
+                                <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Statistics Strip -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="stat-card d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small fw-semibold text-uppercase">Registered Students</span>
+                    <h3 class="fw-bold mt-1 mb-0">{{ total_students }}</h3>
+                </div>
+                <div class="stat-icon stat-icon-primary">
+                    <i class="bi bi-mortarboard-fill"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small fw-semibold text-uppercase">Hiring Partners</span>
+                    <h3 class="fw-bold mt-1 mb-0">{{ total_companies }}</h3>
+                </div>
+                <div class="stat-icon stat-icon-success">
+                    <i class="bi bi-building-fill"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small fw-semibold text-uppercase">Active Job Drives</span>
+                    <h3 class="fw-bold mt-1 mb-0">{{ active_jobs }}</h3>
+                </div>
+                <div class="stat-icon stat-icon-warning">
+                    <i class="bi bi-briefcase-fill"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Platform Highlights Section -->
+    <div class="mb-5">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Platform Capabilities</h2>
+            <p class="text-muted">Built for real-world academic institutions with practical automation.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card-modern h-100 p-4">
+                    <div class="stat-icon stat-icon-primary mb-3">
+                        <i class="bi bi-cpu"></i>
+                    </div>
+                    <h5 class="fw-bold">Explainable AI Recommendations</h5>
+                    <p class="text-muted small">
+                        Calculates transparent match scores based on student skills, CGPA, branch, and project experience using Scikit-Learn TF-IDF vector similarity.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card-modern h-100 p-4">
+                    <div class="stat-icon stat-icon-info mb-3">
+                        <i class="bi bi-file-earmark-medical"></i>
+                    </div>
+                    <h5 class="fw-bold">Automated Eligibility Checker</h5>
+                    <p class="text-muted small">
+                        Instantly verifies student criteria against company cutoffs (CGPA, departments, graduation batch) and displays exact, transparent explanations.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card-modern h-100 p-4">
+                    <div class="stat-icon stat-icon-success mb-3">
+                        <i class="bi bi-file-earmark-pdf"></i>
+                    </div>
+                    <h5 class="fw-bold">Resume Skill Extractor</h5>
+                    <p class="text-muted small">
+                        Parses uploaded student PDF resumes to identify technical skills across 70+ programming languages, frameworks, and databases with 1-click import.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Featured Recruiting Companies -->
+    {% if featured_companies %}
+    <div class="mb-5">
+        <h4 class="fw-bold mb-4">Leading Recruiting Partners</h4>
+        <div class="row g-3">
+            {% for c in featured_companies %}
+            <div class="col-md-4 col-lg-2">
+                <div class="card-modern text-center p-3 h-100">
+                    <img src="{{ c.logo_url }}" alt="{{ c.name }}" style="height:36px; object-fit:contain;" class="mb-2 mx-auto">
+                    <div class="fw-semibold small text-truncate">{{ c.name }}</div>
+                    <span class="text-muted" style="font-size:0.75rem;">{{ c.industry }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

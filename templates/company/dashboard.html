@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% block title %}Recruiter Dashboard - {{ company.name }}{% endblock %}
+{% block page_heading %}{{ company.name }} Campus Recruitment Portal{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Header Banner -->
+    <div class="card-modern p-4 mb-4 border-0 shadow-sm" style="background: linear-gradient(135deg, #065f46 0%, #047857 100%); color: #ffffff;">
+        <div class="row align-items-center g-3">
+            <div class="col-lg-8">
+                <div class="d-flex align-items-center gap-3">
+                    <img src="{{ company.logo_url or 'https://ui-avatars.com/api/?name=' + company.name }}" alt="{{ company.name }}" class="company-logo-img" style="width: 58px; height: 58px; background:#fff;">
+                    <div>
+                        <h3 class="fw-bold mb-0 text-white">{{ company.name }} Recruiter Dashboard</h3>
+                        <span class="text-light opacity-90 small">
+                            <i class="bi bi-geo-alt me-1"></i> {{ company.location }} • {{ company.industry }} • Recruiter: {{ company.recruiter_name or 'Hiring Team' }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <a href="{{ url_for('company.post_job') }}" class="btn btn-light fw-bold shadow-sm">
+                    <i class="bi bi-plus-lg me-1 text-success"></i> Post New Placement Drive
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 15: Recruiter Stat KPI Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Active Drives</span>
+                        <h3 class="fw-bold mt-1 mb-0">{{ jobs|length }}</h3>
+                    </div>
+                    <div class="stat-icon stat-icon-primary">
+                        <i class="bi bi-briefcase-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Total Applicants</span>
+                        <h3 class="fw-bold mt-1 mb-0">{{ total_applicants }}</h3>
+                    </div>
+                    <div class="stat-icon stat-icon-info">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Shortlisted</span>
+                        <h3 class="fw-bold mt-1 mb-0">{{ shortlisted }}</h3>
+                    </div>
+                    <div class="stat-icon stat-icon-warning">
+                        <i class="bi bi-bookmark-check-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Selected / Hired</span>
+                        <h3 class="fw-bold mt-1 mb-0 text-success">{{ selected }}</h3>
+                    </div>
+                    <div class="stat-icon stat-icon-success">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Job Drives Table -->
+    <div class="card-modern p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0"><i class="bi bi-briefcase text-primary me-2"></i>My Active Placement Drives</h5>
+            <a href="{{ url_for('company.applicants') }}" class="btn btn-sm btn-outline-primary fw-semibold">
+                <i class="bi bi-person-check-fill me-1"></i> View All Applicants
+            </a>
+        </div>
+
+        {% if jobs %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Job Role</th>
+                            <th>Cutoff & Skills</th>
+                            <th>Package</th>
+                            <th>Applicants</th>
+                            <th>Deadline</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for j in jobs %}
+                        <tr>
+                            <td>
+                                <strong class="text-dark d-block">{{ j.title }}</strong>
+                                <span class="text-muted" style="font-size:0.75rem;">{{ j.location }} • {{ j.openings }} Openings</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Min CGPA: {{ j.min_cgpa }}</span>
+                                <div class="text-muted mt-1 text-truncate" style="max-width:250px; font-size:0.72rem;">{{ j.required_skills }}</div>
+                            </td>
+                            <td>
+                                <span class="badge bg-success-subtle text-success border border-success-subtle fw-bold">{{ j.salary_package }}</span>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('company.applicants', job_id=j.id) }}" class="btn btn-sm btn-light border">
+                                    <i class="bi bi-people me-1"></i> {{ j.applications|length }} Candidates
+                                </a>
+                            </td>
+                            <td class="small text-muted">{{ j.deadline }}</td>
+                            <td class="text-end">
+                                <a href="{{ url_for('company.edit_job', job_id=j.id) }}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-briefcase-slash fs-1 text-secondary mb-2 d-block"></i>
+                You haven't posted any placement drives yet.
+                <div class="mt-3">
+                    <a href="{{ url_for('company.post_job') }}" class="btn btn-primary">Post Your First Job</a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

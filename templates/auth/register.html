@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Account - AI Placement Portal{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-md-8 col-lg-6">
+        <div class="card-modern p-4 p-md-5 shadow-lg border-0">
+            <div class="text-center mb-4">
+                <div class="d-inline-flex p-3 rounded-circle bg-primary-subtle text-primary mb-2">
+                    <i class="bi bi-person-plus fs-2"></i>
+                </div>
+                <h3 class="fw-bold">Create an Account</h3>
+                <p class="text-muted small">Select your role to get started</p>
+            </div>
+
+            <!-- Role Tabs -->
+            <ul class="nav nav-pills nav-fill mb-4 p-1 bg-light rounded-3" id="roleTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active fw-semibold" id="student-tab" data-bs-toggle="pill" data-bs-target="#student-form" type="button" role="tab" onclick="setRole('student')">
+                        <i class="bi bi-mortarboard-fill me-1"></i> Student
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link fw-semibold" id="company-tab" data-bs-toggle="pill" data-bs-target="#company-form" type="button" role="tab" onclick="setRole('company')">
+                        <i class="bi bi-building-fill me-1"></i> Recruiter / Company
+                    </button>
+                </li>
+            </ul>
+
+            <form method="POST" action="{{ url_for('auth.register') }}">
+                <input type="hidden" name="role" id="roleInput" value="student">
+
+                <!-- Common Credentials -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold small">Username</label>
+                        <input type="text" name="username" class="form-control" placeholder="john_doe" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold small">Email Address</label>
+                        <input type="email" name="email" class="form-control" placeholder="john@example.com" required>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold small">Password</label>
+                        <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold small">Confirm Password</label>
+                        <input type="password" name="confirm_password" class="form-control" placeholder="••••••••" required>
+                    </div>
+                </div>
+
+                <!-- Student-specific fields -->
+                <div id="studentFields">
+                    <hr class="my-4">
+                    <h6 class="fw-bold text-primary mb-3"><i class="bi bi-person-lines-fill me-1"></i> Academic Profile</h6>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Full Name</label>
+                        <input type="text" name="full_name" class="form-control" placeholder="Johnathan Doe">
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">Department / Branch</label>
+                            <select name="department" class="form-select">
+                                <option value="Computer Science">Computer Science</option>
+                                <option value="Information Technology">Information Technology</option>
+                                <option value="Electronics">Electronics & Comm.</option>
+                                <option value="Electrical">Electrical Engineering</option>
+                                <option value="Mechanical">Mechanical Engineering</option>
+                                <option value="Civil">Civil Engineering</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">CGPA</label>
+                            <input type="number" step="0.01" min="0" max="10" name="cgpa" class="form-control" placeholder="8.5">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Grad Year</label>
+                            <input type="number" name="graduation_year" class="form-control" value="2026">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Phone Number</label>
+                        <input type="text" name="phone" class="form-control" placeholder="+91 98765 43210">
+                    </div>
+                </div>
+
+                <!-- Company-specific fields -->
+                <div id="companyFields" style="display: none;">
+                    <hr class="my-4">
+                    <h6 class="fw-bold text-success mb-3"><i class="bi bi-building-check me-1"></i> Company Profile</h6>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Company Name</label>
+                        <input type="text" name="company_name" class="form-control" placeholder="Acme Technologies Inc.">
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">Industry</label>
+                            <input type="text" name="industry" class="form-control" placeholder="Cloud / SaaS / Fintech">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">Office Location</label>
+                            <input type="text" name="location" class="form-control" placeholder="Bangalore, India">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Company Website</label>
+                        <input type="url" name="website" class="form-control" placeholder="https://company.com">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold mt-4">
+                    <i class="bi bi-check-circle-fill me-1"></i> Complete Registration
+                </button>
+            </form>
+
+            <div class="text-center mt-4 pt-3 border-top">
+                <span class="text-muted small">Already have an account?</span>
+                <a href="{{ url_for('auth.login') }}" class="text-primary fw-semibold small ms-1">Sign In</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function setRole(role) {
+    document.getElementById('roleInput').value = role;
+    if (role === 'student') {
+        document.getElementById('studentFields').style.display = 'block';
+        document.getElementById('companyFields').style.display = 'none';
+    } else {
+        document.getElementById('studentFields').style.display = 'none';
+        document.getElementById('companyFields').style.display = 'block';
+    }
+}
+</script>
+{% endblock %}

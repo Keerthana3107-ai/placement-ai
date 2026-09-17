@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Company Profile - {{ company.name }}{% endblock %}
+{% block page_heading %}Recruiting Partner Profile & Branding{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card-modern p-4 p-md-5">
+                <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+                    <img src="{{ company.logo_url or 'https://ui-avatars.com/api/?name=' + company.name }}" alt="{{ company.name }}" class="company-logo-img" style="width: 60px; height: 60px;">
+                    <div>
+                        <h4 class="fw-bold mb-0">{{ company.name }}</h4>
+                        <span class="text-muted small">Update your company details and recruiter contact points for campus drives.</span>
+                    </div>
+                </div>
+
+                <form method="POST" action="{{ url_for('company.profile') }}">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Company Name</label>
+                            <input type="text" name="name" class="form-control" value="{{ company.name }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Industry Domain</label>
+                            <input type="text" name="industry" class="form-control" value="{{ company.industry }}" required>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Office Location</label>
+                            <input type="text" name="location" class="form-control" value="{{ company.location }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Company Website</label>
+                            <input type="url" name="website" class="form-control" value="{{ company.website or '' }}" placeholder="https://company.com">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Logo Image URL</label>
+                        <input type="text" name="logo_url" class="form-control" value="{{ company.logo_url or '' }}" placeholder="https://logo.url/company.svg">
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Lead Recruiter Name</label>
+                            <input type="text" name="recruiter_name" class="form-control" value="{{ company.recruiter_name or '' }}" placeholder="Lead Recruiter">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Recruiter Email Contact</label>
+                            <input type="email" name="recruiter_email" class="form-control" value="{{ company.recruiter_email or '' }}" placeholder="recruiting@company.com">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-semibold">Company Overview & Culture</label>
+                        <textarea name="description" rows="4" class="form-control" placeholder="Share background and mission...">{{ company.description or '' }}</textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                        <i class="bi bi-save me-1"></i> Save Profile Changes
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

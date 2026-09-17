@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block title %}Application Tracker - AI Placement Portal{% endblock %}
+{% block page_heading %}My Campus Placement Applications{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">Application Lifecycle Tracker</h4>
+            <p class="text-muted small mb-0">Monitor the recruitment pipeline progress for each applied campus drive.</p>
+        </div>
+        <a href="{{ url_for('student.jobs') }}" class="btn btn-primary fw-semibold">
+            <i class="bi bi-plus-lg me-1"></i> Browse More Drives
+        </a>
+    </div>
+
+    {% if applications %}
+        <div class="d-flex flex-column gap-4">
+            {% for app in applications %}
+            {% set job = app.job %}
+            <div class="card-modern p-4">
+                <!-- Top Row: Company Info & Current Status Pill -->
+                <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4 pb-3 border-bottom">
+                    <div class="d-flex align-items-center gap-3">
+                        <img src="{{ job.company.logo_url or 'https://ui-avatars.com/api/?name=' + job.company.name }}" alt="{{ job.company.name }}" class="company-logo-img" style="width: 52px; height: 52px;">
+                        <div>
+                            <h5 class="fw-bold mb-1 text-dark">{{ job.title }}</h5>
+                            <span class="text-muted small">
+                                <i class="bi bi-building"></i> {{ job.company.name }} • <i class="bi bi-geo-alt"></i> {{ job.location }} • <i class="bi bi-cash-stack"></i> {{ job.salary_package }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="text-md-end">
+                        <span class="badge {{ app.status|status_badge }} px-3 py-2 fs-6 shadow-sm">
+                            {{ app.status }}
+                        </span>
+                        <span class="text-muted d-block mt-1" style="font-size:0.75rem;">
+                            Applied on: {{ app.applied_at.strftime('%b %d, %Y') }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Visual Application Timeline Stepper -->
+                <div class="mb-4 px-2">
+                    <div class="timeline-stepper">
+                        <!-- Step 1: Applied -->
+                        <div class="timeline-step {% if app.status in ['Applied', 'Under Review', 'Shortlisted', 'Interview Scheduled', 'Selected'] %}completed{% endif %}">
+                            <div class="timeline-step-circle">
+                                <i class="bi bi-send-check"></i>
+                            </div>
+                            <div class="timeline-step-label">Applied</div>
+                        </div>
+
+                        <!-- Step 2: Under Review -->
+                        <div class="timeline-step {% if app.status in ['Under Review', 'Shortlisted', 'Interview Scheduled', 'Selected'] %}completed{% elif app.status == 'Applied' %}active{% endif %}">
+                            <div class="timeline-step-circle">
+                                <i class="bi bi-search"></i>
+                            </div>
+                            <div class="timeline-step-label">Under Review</div>
+                        </div>
+
+                        <!-- Step 3: Shortlisted -->
+                        <div class="timeline-step {% if app.status in ['Shortlisted', 'Interview Scheduled', 'Selected'] %}completed{% elif app.status == 'Under Review' %}active{% endif %}">
+                            <div class="timeline-step-circle">
+                                <i class="bi bi-bookmark-check"></i>
+                            </div>
+                            <div class="timeline-step-label">Shortlisted</div>
+                        </div>
+
+                        <!-- Step 4: Interview Scheduled -->
+                        <div class="timeline-step {% if app.status in ['Interview Scheduled', 'Selected'] %}completed{% elif app.status == 'Shortlisted' %}active{% endif %}">
+                            <div class="timeline-step-circle">
+                                <i class="bi bi-camera-video"></i>
+                            </div>
+                            <div class="timeline-step-label">Interview</div>
+                        </div>
+
+                        <!-- Step 5: Final Outcome (Selected or Rejected) -->
+                        {% if app.status == 'Rejected' %}
+                            <div class="timeline-step rejected">
+                                <div class="timeline-step-circle">
+                                    <i class="bi bi-x-lg"></i>
+                                </div>
+                                <div class="timeline-step-label text-danger">Not Selected</div>
+                            </div>
+                        {% else %}
+                            <div class="timeline-step {% if app.status == 'Selected' %}completed{% endif %}">
+                                <div class="timeline-step-circle">
+                                    <i class="bi bi-trophy"></i>
+                                </div>
+                                <div class="timeline-step-label">Selected</div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Application Remarks and Interviews -->
+                <div class="row g-3 align-items-center bg-light p-3 rounded-3 border">
+                    <div class="col-md-8">
+                        <strong class="small text-dark d-block mb-1"><i class="bi bi-info-circle text-primary me-1"></i>Placement Office / Recruiter Notes:</strong>
+                        <p class="small text-muted mb-0">{{ app.remarks or 'Your application is progressing through the campus evaluation process.' }}</p>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        {% if app.interviews %}
+                            <a href="{{ url_for('student.interviews') }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-calendar-check me-1"></i> View Interview ({{ app.interviews|length }})
+                            </a>
+                        {% endif %}
+                        <a href="{{ url_for('student.job_detail', job_id=job.id) }}" class="btn btn-sm btn-light border ms-1">
+                            Job Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card-modern p-5 text-center text-muted">
+            <i class="bi bi-folder-x fs-1 text-secondary mb-3 d-block"></i>
+            <h5 class="fw-bold">No Active Applications Found</h5>
+            <p class="text-muted small">You haven't applied to any placement opportunities yet.</p>
+            <a href="{{ url_for('student.jobs') }}" class="btn btn-primary mt-2">
+                Browse Placement Opportunities
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

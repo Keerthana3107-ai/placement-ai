@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Companies - Admin Portal{% endblock %}
+{% block page_heading %}Partner Companies Management Directory{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h4 class="fw-bold mb-1">Registered Hiring Partners</h4>
+            <p class="text-muted small mb-0">Manage corporate relations, recruiter contacts, and recruiting drive permissions.</p>
+        </div>
+        <button class="btn btn-primary fw-semibold" data-bs-toggle="modal" data-bs-target="#addCompanyModal">
+            <i class="bi bi-plus-lg me-1"></i> Add New Company
+        </button>
+    </div>
+
+    <!-- Company Cards Grid -->
+    <div class="row g-3">
+        {% for c in companies %}
+        <div class="col-md-6 col-xl-4">
+            <div class="card-modern p-4 h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <img src="{{ c.logo_url or 'https://ui-avatars.com/api/?name=' + c.name }}" alt="{{ c.name }}" class="company-logo-img" style="width: 50px; height: 50px;">
+                        <span class="badge bg-light text-muted border small">{{ c.industry }}</span>
+                    </div>
+
+                    <h5 class="fw-bold mb-1 text-dark">{{ c.name }}</h5>
+                    <div class="small text-muted mb-3"><i class="bi bi-geo-alt"></i> {{ c.location }}</div>
+                    
+                    <p class="small text-muted mb-3 text-truncate-2" style="min-height: 40px;">
+                        {{ c.description or 'Corporate recruitment partner at university campus.' }}
+                    </p>
+
+                    <div class="p-2 bg-light rounded-2 small text-muted mb-3">
+                        <div><i class="bi bi-person me-1"></i> Recruiter: <strong>{{ c.recruiter_name or 'Hiring Team' }}</strong></div>
+                        <div><i class="bi bi-envelope me-1"></i> {{ c.recruiter_email or 'careers@company.com' }}</div>
+                        {% if c.website %}
+                        <div class="mt-1"><i class="bi bi-globe me-1"></i> <a href="{{ c.website }}" target="_blank" class="text-decoration-none small">{{ c.website }}</a></div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="pt-3 border-top d-flex justify-content-between align-items-center">
+                    <span class="small fw-semibold text-primary">
+                        <i class="bi bi-briefcase me-1"></i> {{ c.jobs|length }} Job Postings
+                    </span>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editCompanyModal{{ c.id }}">
+                            <i class="bi bi-pencil"></i> Edit
+                        </button>
+                        <form method="POST" action="{{ url_for('admin.delete_company', company_id=c.id) }}" onsubmit="return confirm('Are you sure you want to delete {{ c.name }}? This will remove all associated jobs.');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Company Modal -->
+        <div class="modal fade" id="editCompanyModal{{ c.id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <form method="POST" action="{{ url_for('admin.companies') }}">
+                        <input type="hidden" name="action" value="edit">
+                        <input type="hidden" name="company_id" value="{{ c.id }}">
+
+                        <div class="modal-header">
+                            <h5 class="modal-title fw-bold">Edit Company: {{ c.name }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">Company Name</label>
+                                <input type="text" name="name" class="form-control" value="{{ c.name }}" required>
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label small fw-semibold">Industry</label>
+                                    <input type="text" name="industry" class="form-control" value="{{ c.industry }}" required>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small fw-semibold">Location</label>
+                                    <input type="text" name="location" class="form-control" value="{{ c.location }}" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">Website URL</label>
+                                <input type="url" name="website" class="form-control" value="{{ c.website or '' }}">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">Logo Image URL</label>
+                                <input type="text" name="logo_url" class="form-control" value="{{ c.logo_url or '' }}">
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label small fw-semibold">Recruiter Name</label>
+                                    <input type="text" name="recruiter_name" class="form-control" value="{{ c.recruiter_name or '' }}">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small fw-semibold">Recruiter Email</label>
+                                    <input type="email" name="recruiter_email" class="form-control" value="{{ c.recruiter_email or '' }}">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">Description</label>
+                                <textarea name="description" rows="3" class="form-control">{{ c.description or '' }}</textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary fw-semibold">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Add Company Modal -->
+<div class="modal fade" id="addCompanyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('admin.companies') }}">
+                <input type="hidden" name="action" value="create">
+
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Add New Hiring Partner</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Company Name</label>
+                        <input type="text" name="name" class="form-control" placeholder="e.g. Cisco Systems" required>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Industry</label>
+                            <input type="text" name="industry" class="form-control" placeholder="Networking / Cloud" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Location</label>
+                            <input type="text" name="location" class="form-control" placeholder="Bangalore" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Website URL</label>
+                        <input type="url" name="website" class="form-control" placeholder="https://cisco.com">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Logo URL</label>
+                        <input type="text" name="logo_url" class="form-control" placeholder="https://logo.url/logo.svg">
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Recruiter Name</label>
+                            <input type="text" name="recruiter_name" class="form-control" placeholder="John HR">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Recruiter Email</label>
+                            <input type="email" name="recruiter_email" class="form-control" placeholder="hr@cisco.com">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Description</label>
+                        <textarea name="description" rows="3" class="form-control" placeholder="Brief background about the company..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary fw-semibold">Register Company</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

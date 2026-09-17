@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}Interview Schedule - AI Placement Portal{% endblock %}
+{% block page_heading %}Campus Recruitment Interview Schedule{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Next Interview Countdown Hero (if scheduled) -->
+    {% set upcoming = interviews|selectattr('status', 'equalto', 'Scheduled')|list %}
+    {% if upcoming %}
+    {% set next_int = upcoming[0] %}
+    <div class="countdown-box mb-4">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-7">
+                <span class="badge bg-warning text-dark px-3 py-1 mb-2 fw-bold">
+                    <i class="bi bi-camera-video-fill me-1"></i> Next Scheduled Interview
+                </span>
+                <h3 class="fw-bold text-white mb-1">{{ next_int.round_name }}</h3>
+                <h5 class="text-light opacity-90 mb-3">{{ next_int.job.title }} at <strong>{{ next_int.company.name }}</strong></h5>
+                
+                <div class="d-flex flex-wrap gap-3 small text-light opacity-90 mb-2">
+                    <div><i class="bi bi-calendar-event me-1"></i> Date: <strong>{{ next_int.interview_date }}</strong></div>
+                    <div><i class="bi bi-clock me-1"></i> Time: <strong>{{ next_int.interview_time }}</strong></div>
+                    <div><i class="bi bi-laptop me-1"></i> Mode: {{ next_int.mode }}</div>
+                </div>
+
+                {% if next_int.notes %}
+                <div class="p-2 rounded-2 mt-2" style="background: rgba(255,255,255,0.1); font-size: 0.8rem;">
+                    <strong>Preparation Instructions:</strong> {{ next_int.notes }}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="col-lg-5 text-center text-lg-end">
+                <span class="small text-uppercase text-light opacity-75 d-block mb-2">Time Remaining Until Round:</span>
+                <div id="interviewCountdown" data-target-datetime="{{ next_int.interview_date }}T{{ next_int.interview_time }}" class="mb-3">
+                    <!-- Timer populated by main.js -->
+                </div>
+                {% if next_int.meeting_link %}
+                <a href="{{ next_int.meeting_link }}" target="_blank" class="btn btn-success btn-lg px-4 fw-bold shadow">
+                    <i class="bi bi-box-arrow-up-right me-2"></i> Join Video Interview
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- All Interviews List -->
+    <div class="card-modern p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-calendar3 text-primary me-2"></i>All Interview Appointments</h5>
+
+        {% if interviews %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Company & Role</th>
+                            <th>Interview Round</th>
+                            <th>Scheduled Date & Time</th>
+                            <th>Interview Mode</th>
+                            <th>Status</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for i in interviews %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <img src="{{ i.company.logo_url or 'https://ui-avatars.com/api/?name=' + i.company.name }}" alt="{{ i.company.name }}" class="company-logo-img" style="width:36px; height:36px;">
+                                    <div>
+                                        <strong class="text-dark d-block small">{{ i.company.name }}</strong>
+                                        <span class="text-muted" style="font-size:0.75rem;">{{ i.job.title }}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="fw-semibold small">{{ i.round_name }}</span>
+                            </td>
+                            <td>
+                                <div class="small">
+                                    <i class="bi bi-calendar text-primary me-1"></i> {{ i.interview_date }}
+                                    <span class="d-block text-muted"><i class="bi bi-clock me-1"></i> {{ i.interview_time }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border small">{{ i.mode }}</span>
+                            </td>
+                            <td>
+                                <span class="badge {{ i.status|status_badge }}">{{ i.status }}</span>
+                            </td>
+                            <td class="text-end">
+                                {% if i.meeting_link and i.status == 'Scheduled' %}
+                                    <a href="{{ i.meeting_link }}" target="_blank" class="btn btn-sm btn-success">
+                                        <i class="bi bi-box-arrow-up-right me-1"></i> Join
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted small">—</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-calendar-x fs-1 text-secondary mb-2 d-block"></i>
+                No interviews scheduled yet. Once a recruiter shortlists your application, interview details will appear here.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
