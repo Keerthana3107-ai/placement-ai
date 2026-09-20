@@ -2,6 +2,12 @@
 
 A practical, modern, responsive full-stack college placement management platform built with **Python, Flask, SQLite, SQLAlchemy, Scikit-learn, Chart.js, and Bootstrap 5**.
 
+## 🚀 Live Demo
+
+👉 **[Open Placement AI](https://placement-ai-wzdk.onrender.com)**
+
+> The live application is deployed on Render.
+
 ---
 
 ## 🌟 Key Features
